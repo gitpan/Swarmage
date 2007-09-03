@@ -1,0 +1,12 @@
+Changes
+=======
+
+0.00003 - 03 Sep 2007
+  - Use client ack, instead of auto. 
+  - Slight documentation updates
+
+0.00002 - 03 Sep 2007
+  - Various improvements
+
+0.00001_01 - 24 Aug 2007
+  - Work started

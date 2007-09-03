@@ -1,0 +1,13 @@
+#!perl
+use strict;
+use warnings;
+use Path::Class();
+our $HOME ;
+BEGIN
+{
+    $HOME = Path::Class::File->new(__FILE__)->parent->parent;
+}
+use lib( $HOME->subdir('lib')->stringify );
+use Swarmage::CLI;
+
+Swarmage::CLI->dispatch;
