@@ -70,16 +70,15 @@ sub work
     while ($self->is_running()) {
         my @abilities = $self->abilities;
         my @tasks;
-        eval { 
+        eval {
             @tasks = $self->find_task(map { "/queue/task/$_" } @abilities);
         };
         if ($@) {
             print STDERR "find_task() failed: $@\ncontinuing anyway...\n";
-            next;
+            goto SLEEP;
         }
         if (! @tasks) {
-#            print STDERR "No tasks...\n";
-            next;
+            goto SLEEP;
         }
 
         foreach my $task (@tasks) {
@@ -88,7 +87,7 @@ sub work
                 $self->post_work($task);
                 $self->finalize_work($task);
                 if (my $destination = $task->postback) {
-                    $self->insert_storage(
+                    $self->insert_task(
                         Swarmage::Message->new(
                             destination => $destination,
                             data        => $ret
@@ -98,6 +97,7 @@ sub work
             };
             warn if $@;
         }
+SLEEP:
         sleep($self->delay);
     }
 }
@@ -126,8 +126,6 @@ sub post_work
 sub finalize_work
 {
     my ($self, $task) = @_;
-    # This is storage dependent. delegate
-    $task->source->finalize_task($task);
 }
 
 1;

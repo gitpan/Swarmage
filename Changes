@@ -1,6 +1,10 @@
 Changes
 =======
 
+0.00004 - 30 Sep 2007
+  - Deprecate Swarmage::Storage::* and Swarmage::Component::Storage::*
+  - Introduce Swarmage::Queue::*
+
 0.00003 - 03 Sep 2007
   - Use client ack, instead of auto. 
   - Slight documentation updates

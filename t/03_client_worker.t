@@ -1,5 +1,6 @@
 use strict;
 use Test::More;
+use lib("t/lib");
 
 BEGIN
 {
@@ -10,16 +11,16 @@ BEGIN
     ) {
         plan skip_all => "Define SWARMAGE_STOMP_HOSTNAME, SWARMAGE_STOMP_PORT, SWARMAGE_STOMP_LOGIN, and SWARMAGE_STOMP_PASSCODE to run these tests";
     } else {
-        plan tests => 8;
+        plan tests => 5;
         use_ok("Swarmage::Client");
-        use_ok("Swarmage::Worker");
+        use_ok("SwarmageTest::Worker::Sum");
     }
 }
 
-my $queue_id = join('.', 'swarmage_test', $$, int(rand() * 10000));
+my $queue_id = "sum";
 diag("Using temp queue $queue_id");
 my $client   = Swarmage::Client->new(
-    storage => [
+    queues => [
         {   class => 'Stomp',
             connect_info => {
                 map { ($_ => $ENV{ uc "SWARMAGE_STOMP_$_" }) }
@@ -28,9 +29,8 @@ my $client   = Swarmage::Client->new(
         },
     ]
 );
-my $worker   = Swarmage::Worker->new(
-    ability => [ $queue_id ],
-    storage => [
+my $worker   = SwarmageTest::Worker::Sum->new(
+    queues => [
         {   class        => 'Stomp',
             connect_info => {
               map { ($_ => $ENV{ uc "SWARMAGE_STOMP_$_" }) }
@@ -38,29 +38,18 @@ my $worker   = Swarmage::Worker->new(
             }
         },
     ],
-    callbacks => {
-        work      => sub {
-            my ($self, $task) = @_;
-            ok($task, "received task");
-            is($task->task_class, $queue_id, "is the correct message");
-            is($task->data->{id}, $$, "is the correct value"); 
-
-            return $task->data->{arg1} + $task->data->{arg2};
-        },
-        post_work => sub { shift->is_running(0) }
-    }
 );
 
 my $task = Swarmage::Task->new(
     task_class => $queue_id,
-    data => { id => $$, arg1 => 5, arg2 => 3 },
+    data => { id => $$, arg1 => 9, arg2 => 3 },
     postback => "$queue_id.postback"
 );
 ok($client->insert_task($task), "insert ok");
 
 $worker->work;
 
-my $message = $client->storage_list->[0]->fetch_queue("$queue_id.postback");
+my ($message) = $client->find_task('/queue/sum.postback');
 ok($message, "postback message ok");
 is($message->data, $task->data->{arg1} + $task->data->{arg2}, "postback result ok (data = " . $message->data . ")");
 

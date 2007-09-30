@@ -7,10 +7,12 @@ package Swarmage::Client;
 use strict;
 use warnings;
 use UNIVERSAL::isa;
+use UNIVERSAL::require;
 use Swarmage::Component;
 our @ISA = qw(Swarmage::Component);
+use List::Util;
 
-__PACKAGE__->load_components( qw(Storage) );
+__PACKAGE__->mk_group_accessors(simple => qw(queues));
 
 sub new
 {
@@ -18,26 +20,41 @@ sub new
     my %args  = @_;
     my $self  = $class->next::method(@_);
 
+    $self->setup_queues($args{queues});
+    return $self;
+}
+
+sub setup_queues
+{
+    my $self = shift;
+    my $config = shift;
+    if (ref $config ne 'ARRAY') {
+        $config = [ $config ];
+    }
+
+    my $list = [];
+    foreach my $h (@$config) {
+        my $storage_class = delete $h->{class} || 'Stomp';
+        if ($storage_class !~ s/^\+//) {
+            $storage_class = 'Swarmage::Queue::' . $storage_class;
+        }
+        $storage_class->require or die;
+
+        my $storage = $storage_class->new(%$h);
+        push @$list, $storage;
+    }
+    $self->queues($list);
 }
 
 sub insert_task
 {
     my ($self, $task) = @_;
-
     if ( ! $task->isa('Swarmage::Task')) {
         $task = Swarmage::Task->new(%$task);
     }
 
-    $self->_insert_storage($task);
-}
-
-sub _insert_storage
-{
-    my ($self, $task) = @_;
-
-    my @list = $self->storage_list(shuffled => 1);
-    foreach my $storage (@list) {
-        return 1 if $storage->insert_queue( $task );
+    foreach my $q ( List::Util::shuffle( @{ $self->queues } ) ) {
+        return 1 if $q->insert( message => $task );
     }
     return ();
 }
@@ -46,13 +63,11 @@ sub find_task
 {
     my ($self, @task_class) = @_;
 
-    my @list = $self->storage_list(shuffled => 1);
     my @tasks ;
-    foreach my $storage (@list) {
+    foreach my $q ( List::Util::shuffle( @{ $self->queues } ) ) {
         foreach my $task_class (@task_class) {
-            my $task = $storage->fetch_queue($task_class);
+            my $task = $q->fetch( queue => $task_class );
             if ($task) {
-                $task->source($storage);
                 push @tasks, $task;
             }
         }
@@ -71,6 +86,8 @@ Swarmage::Client - Swarmage Client
 =head1 METHODS
 
 =head2 new
+
+=head2 setup_queues
 
 =head2 insert_task
 

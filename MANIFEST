@@ -15,11 +15,10 @@ lib/Swarmage/CLI/Help.pm
 lib/Swarmage/CLI/Task.pm
 lib/Swarmage/CLI/Worker.pm
 lib/Swarmage/Client.pm
-lib/Swarmage/Component.pm
-lib/Swarmage/Component/Storage.pm
 lib/Swarmage/Log.pm
 lib/Swarmage/Message.pm
-lib/Swarmage/Storage/Stomp.pm
+lib/Swarmage/Queue.pm
+lib/Swarmage/Queue/Stomp.pm
 lib/Swarmage/Task.pm
 lib/Swarmage/Worker.pm
 Makefile.PL

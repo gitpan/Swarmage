@@ -2,9 +2,11 @@
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
+
 package Swarmage;
+use strict;
 use vars qw($VERSION);
-$VERSION = '0.00003';
+$VERSION = '0.00004';
 
 1;
 

@@ -1,23 +1,18 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Storage/Stomp.pm 2425 2007-09-03T10:56:40.325353Z daisuke  $
+# $Id$
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
-# All rights reserved.
+# All rights reserved
 
-package Swarmage::Storage::Stomp;
+package Swarmage::Queue::Stomp;
 use strict;
 use warnings;
-use Swarmage::Component;
-our @ISA = qw(Swarmage::Component);
+use base qw(Swarmage::Queue);
 use MIME::Base64;
 use Net::Stomp;
 use Storable qw(freeze thaw);
 use Swarmage::Task;
 
 __PACKAGE__->mk_group_accessors(simple => qw(connect_info subscriptions stomp));
-
-# aliases
-*fetch = \&fetch_queue;
-*insert = \&insert_queue;
 
 sub new
 {
@@ -35,37 +30,40 @@ sub new
     return $self;
 }
 
-sub insert_queue
+sub insert
 {
-    my ($self, $message) = @_;
-    my $destination = $message->destination;
-    if ($destination !~ m{^/queue/}) {
-        $destination = "/queue/$destination";
-    }
+    my ($self, %opts) = @_;
 
-    if (my $postback = $message->postback) {
-        $self->ensure_subscribed( $postback );
+    my $message = $opts{message} || Carp::croak("No message specified");
+    my $queue   = $opts{queue}   ||
+        ref($message) && $message->isa('Swarmage::Message') ? $message->destination : 
+        Carp::croak("No queue specified")
+    ;
+    if ($queue !~ m{^/queue/}) {
+        $queue = "/queue/$queue";
     }
 
     $self->ensure_connected->send({
-        destination => $destination,
+        destination => $queue,
         body        => encode_base64( freeze( $message ) )
     }) or Carp::croak("Could not send message: $!");
 }
 
-sub fetch_queue
+sub fetch
 {
-    my ($self, $destination) = @_;
+    my ($self, %opts) = @_;
 
-    if ($destination !~ m{^/queue/}) {
-        $destination = "/queue/$destination";
+    my $queue   = $opts{queue} || Carp::croak("No queue specified");
+    if ($queue !~ m{^/queue/}) {
+        $queue = "/queue/$queue";
     }
-    $self->ensure_subscribed( $destination );
+    $self->ensure_subscribed( $queue );
     if ($self->stomp->can_read({ timeout => '0.1' })) {
         my $frame = $self->stomp->receive_frame;
         if ($frame->command eq 'ERROR') {
             die "received stomp error: " . $frame->body;
         }
+        $self->stomp->ack({ frame => $frame });
         my $ret   =  eval { thaw( decode_base64($frame->body) ) };
         if (! $ret->attr) { $ret->attr({}) }
         $ret->attr->{frame} = $frame;
@@ -73,12 +71,6 @@ sub fetch_queue
         return $ret;
     }
     return;
-}
-
-sub finalize_task
-{
-    my ($self, $task) = @_;
-    $self->ensure_connected->ack({ frame => $task->attr->{frame} });
 }
 
 sub ensure_connected
@@ -116,7 +108,6 @@ sub ensure_subscribed
         $stomp->subscribe({
             destination => $destination,
             ack         => 'client',
-            'activemq.prefetchSize' => 1 # This needs to be configurable
         }) or Carp::croak("stomp->subscribe failed");
         $self->subscriptions->{ $destination }++;
     }
@@ -128,29 +119,18 @@ __END__
 
 =head1 NAME
 
-Swarmage::Storage::Stomp - STOMP-Based Backend For Swarmage
+Swarmage::Queue::Stomp - Stomp Implementation Of Swarmage::Queue
 
 =head1 METHODS
 
 =head2 new
 
+=head2 insert
+
+=head2 fetch
+
 =head2 ensure_connected
 
-Makes sure that we have a connected Net::Stomp client.
-Returns the Net::Stomp object.
-
-=head2 ensure_subscribed($desination)
-
-Makes sure that we have subscribed to the given destination
-
-=head2 fetch($destination) / fetch_queue($destination)
-
-Fetch the next message in the queue, in the named queue.
-If $destination starts with "/queue/", then that name is used. Otherwise
-"/queue/" is prepended to the destination
-
-=head2 insert / insert_queue
-
-=head2 finalize / finalize_task 
+=head2 ensure_subscribed
 
 =cut
