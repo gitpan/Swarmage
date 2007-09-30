@@ -1,4 +1,4 @@
-# $Id$
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Queue/Stomp.pm 2909 2007-09-30T13:06:51.115468Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved
@@ -12,7 +12,7 @@ use Net::Stomp;
 use Storable qw(freeze thaw);
 use Swarmage::Task;
 
-__PACKAGE__->mk_group_accessors(simple => qw(connect_info subscriptions stomp));
+__PACKAGE__->mk_group_accessors(simple => qw(connect_info subscriptions stomp read_delay));
 
 sub new
 {
@@ -20,12 +20,14 @@ sub new
     my %args  = @_;
     my $self  = $class->next::method(@_);
 
+    $args{read_delay} ||= '0.05';
     my $connect_info = $args{connect_info} || Carp::croak("No connect_info provided");
     $connect_info->{port}     ||= 61613;
     if (! $connect_info || (! $connect_info->{hostname} || ! $connect_info->{port} || ! $connect_info->{login} || ! $connect_info->{passcode})) {
         Carp::croak("No connect_info provided");
     }
     $self->connect_info($connect_info);
+    $self->read_delay($args{read_delay});
 
     return $self;
 }
@@ -58,7 +60,7 @@ sub fetch
         $queue = "/queue/$queue";
     }
     $self->ensure_subscribed( $queue );
-    if ($self->stomp->can_read({ timeout => '0.1' })) {
+    if ($self->stomp->can_read({ timeout => $self->read_delay })) {
         my $frame = $self->stomp->receive_frame;
         if ($frame->command eq 'ERROR') {
             die "received stomp error: " . $frame->body;

@@ -1,6 +1,10 @@
 Changes
 =======
 
+0.00005 - 30 Sep 2007
+  - Make read_delay congifurable
+  - Deprecate 02_storage, replace with 02_queue
+
 0.00004 - 30 Sep 2007
   - Deprecate Swarmage::Storage::* and Swarmage::Component::Storage::*
   - Introduce Swarmage::Queue::*

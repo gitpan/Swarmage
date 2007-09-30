@@ -26,8 +26,6 @@ MANIFEST			This list of files
 META.yml
 script/swarmage
 t/01_basic.t
-t/02_storage/sqlite.t
-t/02_storage/stomp.t
 t/03_client_worker.t
 t/99_kwalitee.t
 t/99_pod-coverage.t
