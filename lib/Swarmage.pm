@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage.pm 2909 2007-09-30T13:06:51.115468Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage.pm 3749 2007-10-19T05:00:46.962903Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -6,7 +6,7 @@
 package Swarmage;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.00005';
+$VERSION = '0.00006';
 
 1;
 
