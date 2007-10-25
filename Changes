@@ -1,6 +1,10 @@
 Changes
 =======
 
+0.00007 - 25 Oct 2007
+  - Fix failing test
+  - Properly die on encountering errors inside find_task()
+
 0.00006 - 19 Oct 2007
   - Packaging blunder (some modules were deprecated, but they still existed
     in my path, and so tests did not catch their absence)

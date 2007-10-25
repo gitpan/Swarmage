@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker.pm 2909 2007-09-30T13:06:51.115468Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker.pm 4036 2007-10-25T09:49:01.685482Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -73,9 +73,8 @@ sub work
         eval {
             @tasks = $self->find_task(map { "/queue/task/$_" } @abilities);
         };
-        if ($@) {
-            print STDERR "find_task() failed: $@\ncontinuing anyway...\n";
-            goto SLEEP;
+        if (my $e = $@) {
+            die "find_task() failed: $e";
         }
         if (! @tasks) {
             goto SLEEP;
@@ -95,7 +94,9 @@ sub work
                     );
                 }
             };
-            warn if $@;
+            if (my $e = $@) {
+                die "Failed while attempting to process task: $e";
+            }
         }
 SLEEP:
         sleep($self->delay);
