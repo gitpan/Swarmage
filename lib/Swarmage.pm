@@ -6,7 +6,7 @@
 package Swarmage;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.00007';
+$VERSION = '0.00008';
 
 1;
 

@@ -1,6 +1,11 @@
 Changes
 =======
 
+0.00008 - 26 Nov 2007
+  - Allow setting the persistent flag to Swarmage::Message and Swarmage::Task
+  - Use nfreeze() instead of freeze()
+  - Shuffle tests
+
 0.00007 - 25 Oct 2007
   - Fix failing test
   - Properly die on encountering errors inside find_task()

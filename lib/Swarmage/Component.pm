@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Component.pm 3749 2007-10-19T05:00:46.962903Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Component.pm 9170 2007-11-14T14:35:16.376408Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -28,7 +28,7 @@ sub mk_classaccessor
 sub new
 {
     my $class = shift;
-    return bless {}, $class;
+    return bless { @_ }, $class;
 }
 
 1;

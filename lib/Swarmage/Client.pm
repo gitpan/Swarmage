@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Client.pm 2909 2007-09-30T13:06:51.115468Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Client.pm 9635 2007-11-20T09:51:57.444029Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -6,11 +6,12 @@
 package Swarmage::Client;
 use strict;
 use warnings;
+use List::Util;
 use UNIVERSAL::isa;
 use UNIVERSAL::require;
 use Swarmage::Component;
 our @ISA = qw(Swarmage::Component);
-use List::Util;
+use constant DEBUG => 0;
 
 __PACKAGE__->mk_group_accessors(simple => qw(queues));
 
@@ -64,13 +65,20 @@ sub find_task
     my ($self, @task_class) = @_;
 
     my @tasks ;
+    my $start = time() if DEBUG;
     foreach my $q ( List::Util::shuffle( @{ $self->queues } ) ) {
         foreach my $task_class (@task_class) {
-            my $task = $q->fetch( queue => $task_class );
+            my $task = eval { $q->fetch( queue => $task_class ) };
+            if ($@) {
+                print STDERR "Failed to fetch from queue: $task_class: $@\n";
+            }
             if ($task) {
                 push @tasks, $task;
             }
         }
+    }
+    if (DEBUG) {
+        print STDERR ref($self) || $self, "->find_task(): ", scalar(@tasks), " fetched in ", time() - $start, " seconds\n";
     }
     return wantarray ? @tasks : \@tasks;
 }

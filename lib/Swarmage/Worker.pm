@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker.pm 4036 2007-10-25T09:49:01.685482Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker.pm 9813 2007-11-25T15:19:59.060459Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -151,8 +151,6 @@ Swarmage::Worker - Swarmage Worker
     # do something interesting
   }
 
-  # Use it by passing a callback
-
 =head1 METHODS
 
 =head2 new
@@ -167,8 +165,8 @@ Starts the work cycle.
 
 =head2 work_once
 
-Does the actual work. The return value will be used as the value to be postback,
-if postback is specified.
+Does the actual work.  The return value will be used as the value to be 
+postback, if postback is specified.
 
 =head2 post_work
 
