@@ -1,30 +1,41 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Task.pm 9170 2007-11-14T14:35:16.376408Z daisuke  $
+# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Task.pm 36144 2007-12-21T01:05:54.525393Z daisuke  $
 #
-# Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
+# Copyright (c) 207 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
 
 package Swarmage::Task;
 use strict;
 use warnings;
-use Swarmage::Message;
-our @ISA = qw(Swarmage::Message);
+use base qw(Class::Accessor::Fast);
+use Digest::MD5 ();
+use MIME::Base64 ();
+use Storable ();
 
-__PACKAGE__->mk_group_accessors(simple => qw(task_class));
+__PACKAGE__->mk_accessors($_) for qw(id type data postback prev);
 
 sub new
 {
     my $class = shift;
-    my %args = @_;
-    my $self = $class->next::method(
-        @_,
-        type => 'task'
-    );
-
-    if (! $self->destination && $self->task_class) {
-        $self->destination("task/" . $self->task_class);
-    }
-    
+    my %args  = @_;
+    my $self  = bless {
+        id       => Digest::MD5::md5_hex($$, rand(), {}, time()),
+        type     => $args{type},
+        data     => $args{data},
+        postback => $args{postback},
+    }, $class;
     return $self;
+}
+
+sub serialize
+{
+    my $self = shift;
+    MIME::Base64::encode_base64( Storable::nfreeze( $self ) );
+}
+
+sub deserialize
+{
+    my $self = shift;
+    Storable::thaw( MIME::Base64::decode_base64( $_[0] ) );
 }
 
 1;
@@ -33,26 +44,22 @@ __END__
 
 =head1 NAME
 
-Swarmage::Task
+Swarmage::Task - A Task
+
+=head1 SYNOPSIS
+
+  use Swarmage::Task;
+  Swarmage::Task->new(
+    type => 'type',
+    data => $whatever,
+  );
 
 =head1 METHODS
 
 =head2 new
 
-=head2 type
+=head2 serialize
 
-=head2 data
+=head2 deserialize
 
-=head2 destination
-
-=head2 postback
-
-=head2 persistent
-
-=head2 task_class
-
-=head2 source
-
-=head2 attr
-
-=cut
+=head2

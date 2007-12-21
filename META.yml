@@ -15,21 +15,23 @@ no_index:
   directory: 
     - inc
     - t
-recommends: 
-  Test::Pod: 0
-  Test::Pod::Coverage: 0
 requires: 
-  App::CLI: 0
-  Class::Accessor::Grouped: 0
-  Class::C3::Componentised: 0
+  Class::Accessor::Fast: 0
+  Class::Data::Inheritable: 0
   Class::Inspector: 0
-  Class::Null: 0
-  Config::Any: 0
+  DBD::SQLite: 0
+  DBI: 0
   Digest::MD5: 0
+  Event::Notify: 0
+  IO::Handle: 0
+  Log::Dispatch: 0
+  Log::Dispatch::Handle: 0
   MIME::Base64: 0
-  Net::Stomp: 0
+  POE: 0
+  POE::Component::Generic: 0
   Storable: 0
-  UNIVERSAL::isa: 0
+  Sys::Hostname: 0
+  Time::HiRes: 0
   UNIVERSAL::require: 0
 tests: t/*.t t/*/*.t
-version: 0.00008
+version: 0.01000

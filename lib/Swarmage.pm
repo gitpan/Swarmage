@@ -1,12 +1,13 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage.pm 4198 2007-10-25T14:31:10.186465Z daisuke  $
+# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage.pm 36147 2007-12-21T01:21:44.144725Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
 
 package Swarmage;
 use strict;
-use vars qw($VERSION);
-$VERSION = '0.00008';
+use warnings;
+use Swarmage::Drone;
+our $VERSION = '0.01000';
 
 1;
 
@@ -18,100 +19,79 @@ Swarmage - A Distributed Job Queue
 
 =head1 SYNOPSIS
 
-  swarmage task insert --config=config.yml
-  swarmage worker --module=MyApp::Worker
+  use Swarmage;
 
 =head1 DESCRIPTION
 
-XXX Warning: Alpha grade software. All API still subject to change.
-RFCs are welcome and will be considered ASAP XXX
+This is a rewrite of previous Swarmage releases. So we're back to pre-alpha.
 
-Swarmage is a simple distributed job queue system.
+Swarmage brings you a complete Controlled Job Queue environment for high
+performance, distributed tasks. Swarmage uses POE's asynchronous engine
+to make a non-blocking worker possible.
 
-Swarmage is comprised of Clients, Workers, and a Message Bus. Clients enqueue
-tasks to be performed in the message queue:
+=head1 TERMS
 
-  use strict;
-  use Swarmage::Client;
+=head2 Cell
 
-  my $client = Swarmage::Client->new(
-    hostname => "message.bus.hostname",
-    login    => "foo",
-    passcode => "bar"
-  );
-  $client->insert_task(
-    Swarmage::Task->new(
-      task_class => 'do_something_interesting',
-      args       => $any_set_of_variables
-    )
-  );
+A Swarmage Cell consists of one or more Drones which are attatched to a
+Queue.
 
-That's it for the client. Now you just need a worker to execute your task.
-On some other host (or, it could as well be the same host):
+=head2 Drone
 
-  use strict;
-  use Swarmage::Worker;
+A Swarmage Drone is the master process that controls multiple Workers.
+The Workers may consist of completely independent tasks
 
-  my $worker = Swarmage::Worker->new(
-    hostname => "message.bus.hostname",
-    login    => "foo",
-    passcode => "bar",
-    ability => {
-      do_something_interesting => sub { "actual code" }
-    }
-  );
-  $worker->work;
+=head2 Worker
 
-You execute this code, and the worker will keep on waiting for 'do_something_interesting' tasks,
-and will execute them when it gets a chance. 
+A Swarmage Worker is a process that is spawned by the Drone.
 
-The above code can also be written in a more object oriented manner.
-Just override the work_once subroutine
+=head1 SWARMAGE CELL
 
-  package MyApp::Worker;
-  use strict;
-  use base qw(Swarmage::Worker);
+A Swarmage Cell is the smallest unit of operation in Swarmage, and it looks
+something like this:
 
-  __PACKAGE__->register_abilities('do_something_interesting');
+  ----------------
+  | Global Queue |
+  ----------------
+     ^ |
+     | v
+  ---------
+  | Drone |--------------------
+  ---------                   |
+      |                       v
+      |  ----------     ---------------
+      |--| Worker |-----| Local Queue |
+      |  ----------  |  ---------------
+      |  ----------  |
+      |--| Worker |--|
+      |  ----------  |
+      |  ----------  |
+      |--| Worker |--|
+      |  ----------  |
+      .              .
+      .              .
+      .              .
 
-  sub work_once { "actual code" }
+There is a Global Queue, which Drones attatch to. This is where users typically
+queue their tasks. Drones take tasks that their Workers can handle. This is
+done by specifying which Workers can handle which types of tasks in the
+initialization of Drones.
 
-  # in your worker script
-  use strict;
-  use MyApp::Worker;
+Once the Drone receives possibly multiple tasks from the Global Queue, the
+tasks are inserted into what's called a Local Queue. Drones keep track of
+what tasks are currently handle by looking at this Local Queue, and in
+turn Workers attempt to grab tasks the Local Queue.
 
-  my $worker = MyApp::Worker->new(
-    hostname => "message.bus.hostname",
-    login    => "foo",
-    passcode => "bar",
-  );
-  $worker->work;
+Workers only knows about the Local Queue. This is to avoid unnecessary polling
+by the Workers to the Global Queue. Workers can also pass tasks between
+other Workers in the local Drone group by enqueuing new tasks to the Local
+Queue.
 
-Actually, once you write MyApp::Worker, you can just use the swarmage script
-that comes with this distribution:
+Once the task is completed, the Drone is notified, and the task will be
+finalized.
 
-  swarmage worker --module=MyApp::Worker \
-    --hostname=message.bus.hostname \
-    --login=foo \
-    --passcode=bar
-
-...And if you don't have to do any special pre-processing, you can just
-specify a task within a config file 
-
-  swarmage task insert --config=foo.yml
-
-=head1 TASKS
-
-Tasks are simply a combination of 'task_class', and a set of arbitrary data.
-It's completely up to the client and the worker to make any sense out of it.
-
-=head1 MESSAGE BUS
-
-Swarmage relies on message queues such as ActiveMQ as the underlying
-message layer.
-
-There's an unfinished attempt at making a small scale DBIC-based message layer,
-but so far I have no plans to work on it. Patches are more than welcome
+Please consult the documentation for Swarmage::Drone and Swarmage::Worker for
+more details on how the components interact with each other
 
 =head1 AUTHOR
 
@@ -125,4 +105,3 @@ under the same terms as Perl itself.
 See http://www.perl.com/perl/misc/Artistic.html
 
 =cut
-
