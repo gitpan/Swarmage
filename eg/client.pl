@@ -4,17 +4,11 @@ use lib 'lib';
 use lib 't/lib';
 use Swarmage::Client;
 
-my $local_db = "t/swarmage.db";
 my $client = Swarmage::Client->new(
     queue => {
-        module => "DBI",
+        module => "BerkeleyDB",
         config => {
-            connect_info => [
-                "dbi:SQLite:dbname=$local_db",
-                undef,
-                undef,
-                { AutoCommit => 1, RaiseError => 1 },
-            ]
+            filename => "eg/queue.db"
         }
     }
 );

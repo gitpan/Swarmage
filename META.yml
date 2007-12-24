@@ -16,10 +16,10 @@ no_index:
     - inc
     - t
 requires: 
+  BerkeleyDB: 0
   Class::Accessor::Fast: 0
   Class::Data::Inheritable: 0
   Class::Inspector: 0
-  DBD::SQLite: 0
   DBI: 0
   Digest::MD5: 0
   Event::Notify: 0

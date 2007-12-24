@@ -5,10 +5,10 @@ name('Swarmage');
 
 all_from('lib/Swarmage.pm');
 
+requires('BerkeleyDB');
 requires('Class::Inspector');
 requires('Class::Accessor::Fast');
 requires('Class::Data::Inheritable');
-requires('DBD::SQLite');
 requires('DBI');
 requires('Digest::MD5');
 requires('Event::Notify');

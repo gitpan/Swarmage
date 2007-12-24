@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Drone.pm 36144 2007-12-21T01:05:54.525393Z daisuke  $
+# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Drone.pm 36248 2007-12-24T08:59:28.870882Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -12,6 +12,7 @@ use Log::Dispatch;
 use Log::Dispatch::Handle;
 use IO::Handle;
 use POE ;
+use Swarmage::Queue::Generic;
 use Swarmage::Queue::Local;
 use Swarmage::Task;
 use Swarmage::Util;
@@ -68,7 +69,7 @@ sub setup_log
             my %args = @_;
             my $message = $args{message};
             $message =~ s/(?!\n)\Z/\n/;
-            $message = "[$args{level}]: $message";
+            $message = "[$args{level}:$$]: $message";
             return $message;
         }
     );
@@ -122,9 +123,9 @@ sub register_worker
     # XXX - Fix calling syntax for task_type
     my $worker = Swarmage::Worker->new(
         %$config,
+        queue     => $self->local_queue,
         task_type => $task_type,
-        filename => $self->local_queue->filename,
-        parent => $self
+        parent    => $self
     );
     push @{$self->workers}, $worker;
 
@@ -197,7 +198,7 @@ sub _poe_pump_queue
     foreach my $task_type (keys %{ $max_tasks }) {
         my $diff = $max_tasks->{$task_type} - ($buffered_tasks->{$task_type} || 0);
         if ($diff > 0) {
-            $self->log->debug("PUMP: $task_type");
+            $self->log->debug("[DRONE] PUMP: $task_type");
             $self->queue->pump(
                 event      => 'buffer_work',
                 task_types => [ $task_type ],
@@ -211,9 +212,9 @@ sub _poe_buffer_work
 {
     my ($self, $kernel, $heap, $ref) = @_[OBJECT, KERNEL, HEAP, ARG0];
 
+    $self->log->debug("[DRONE] PUMPED " . scalar(@{ $ref->{result} || [] }) . " tasks");
     my %task_types;
     foreach my $task (@{ $ref->{result} || [] }) {
-warn "buffered task $task";
         $self->buffered_tasks->{$task->type}++;
         $self->local_queue->enqueue($task);
         $task_types{ $task->type }++;
@@ -231,16 +232,21 @@ warn "buffered task $task";
 sub _poe_spawn_queue
 {
     my ($self, $kernel, $session, $heap, $config) = @_[OBJECT, KERNEL, SESSION, HEAP, ARG0];
+
+    my $module    = delete $config->{module} || 'DBI';
     my $queue_pkg = Swarmage::Util::load_module(
-        $config->{module} || 'DBI::Generic',
+        $module,
         'Swarmage::Queue'
     );
 
     $self->log->debug("Setting up queue $queue_pkg");
-    my $queue = $queue_pkg->new(
+    my $queue = Swarmage::Queue::Generic->new(
         %{ $config->{config} || {} },
-        log => $self->log,
+        class => $queue_pkg,
+        verbose => 1,
+        log   => $self->log,
     );
+    return $queue;
 }
 
 1;

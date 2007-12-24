@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Queue/DBI.pm 36144 2007-12-21T01:05:54.525393Z daisuke  $
+# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Queue/DBI.pm 36246 2007-12-24T08:21:06.647474Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All right reserved.
@@ -6,7 +6,7 @@
 package Swarmage::Queue::DBI;
 use strict;
 use warnings;
-use base qw(Class::Accessor::Fast Class::Data::Inheritable);
+use base qw(Swarmage::Queue Class::Data::Inheritable);
 use DBI;
 use Time::HiRes();
 
@@ -25,7 +25,7 @@ sub new
 sub prepare_db
 {
     my $self = shift;
-warn "Connecting to " . $self->connect_info->[0];
+# warn "Connecting to " . $self->connect_info->[0];
     my $dbh = DBI->connect(@{ $self->connect_info });
     $self->dbh( $dbh );
 }
@@ -68,52 +68,79 @@ sub dequeue
     $sth->finish;
 }
 
-sub poll_wait
-{
-    my $self = shift;
-    my %args = @_;
-
-    my @tasks;
-    while (! @tasks) {
-        @tasks = $self->pump(%args);
-        select(undef, undef, undef, rand(1));
-    }
-    return @tasks;
-}
-
 sub pump
 {
     my $self       = shift;
     my %args       = @_;
     my $task_types = $args{task_types};
-
-# warn "polling for @$task_types";
-
-    my $where  = sprintf(
-        'taken_by is NULL AND task_type IN (%s)',
-        join(', ', ('?') x scalar(@$task_types))
-    );
-    my $limit = $args{limit} || 10;
-    my $dbh = $self->dbh;
-
-    my $table = $self->table_name;
-    my $select_sth = $dbh->prepare(<<"    EOSQL");
-        SELECT id, task_data, modified_on
-        FROM $table
-        WHERE $where
-        ORDER BY inserted_on ASC
-        LIMIT $limit
-    EOSQL
-    my $update_sth = $dbh->prepare_cached(<<"    EOSQL");
-        UPDATE $table
-        SET taken_by = ?,
-            taken_on = ?,
-            modified_on = ?
-        WHERE
-            id = ? AND modified_on = ?
-    EOSQL
+    my $limit      = $args{limit} || 10;
 
     my @tasks;
+    eval {
+        my $where  = sprintf(
+            'taken_by is NULL AND task_type IN (%s)',
+            join(', ', ('?') x scalar(@$task_types))
+        );
+        my $dbh = $self->dbh;
+
+        my $table = $self->table_name;
+        my $select_sth = $dbh->prepare(<<"        EOSQL");
+            SELECT id, task_data, modified_on
+            FROM $table
+            WHERE $where
+            ORDER BY inserted_on ASC
+            LIMIT $limit
+        EOSQL
+        my $update_sth = $dbh->prepare_cached(<<"        EOSQL");
+            UPDATE $table
+            SET taken_by = ?,
+                taken_on = ?,
+                modified_on = ?
+            WHERE
+                id = ? AND modified_on = ?
+        EOSQL
+
+        if ( $dbh->{Driver}->{Name} =~ /^sqlite$/) {
+            $self->_fetch_sqlite(\@tasks, $select_sth, $task_types, $update_sth);
+        } else {
+            $self->_fetch_other(\@tasks, $select_sth, $task_types, $update_sth);
+        }
+        $select_sth->finish;
+        $update_sth->finish;
+    };
+# warn "$self Polling resulted in " . scalar(@tasks) . " tasks";
+
+    return @tasks;
+}
+
+sub _fetch_sqlite
+{
+    my ($self, $tasks, $select_sth, $task_types, $update_sth) = @_;
+
+    my @candidates;
+    $select_sth->execute(@$task_types);
+
+    my ($id, $task_data, $modified_on);
+    $select_sth->bind_columns(\($id, $task_data, $modified_on));
+    while ($select_sth->fetchrow_arrayref) {
+        push @candidates, [ $id, $task_data, $modified_on ];
+    }
+    $select_sth->finish;
+
+    foreach my $data (@candidates) {
+        my $now = Time::HiRes::time();
+        if ($update_sth->execute($$, $now, $now, $id, $modified_on) > 0) {
+            my $task = Swarmage::Task->deserialize($task_data);
+            push @$tasks, $task if $task;
+        }
+        $update_sth->finish;
+    }
+}
+
+sub _fetch_other
+{
+    my ($self, $tasks, $select_sth, $task_types, $update_sth) = @_;
+
     $select_sth->execute(@$task_types);
 
     my ($id, $task_data, $modified_on);
@@ -122,15 +149,9 @@ sub pump
         my $now = Time::HiRes::time();
         if ($update_sth->execute($$, $now, $now, $id, $modified_on) > 0) {
             my $task = Swarmage::Task->deserialize($task_data);
-            push @tasks, $task if $task;
+            push @$tasks, $task if $task;
         }
     }
-    $select_sth->finish;
-    $update_sth->finish;
-
-# warn "$self Polling resulted in " . scalar(@tasks) . " tasks";
-
-    return @tasks;
 }
 
 1;

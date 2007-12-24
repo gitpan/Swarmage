@@ -3,13 +3,14 @@ use Test::More;
 
 my @modules = qw(
     Swarmage::Drone
-    Swarmage::Queue::DBI::Generic
     Swarmage::Queue::DBI
-    Swarmage::Queue::Local::Generic
     Swarmage::Queue::Local
+    Swarmage::Queue::BerkeleyDB
+    Swarmage::Queue::Generic
     Swarmage::Task
     Swarmage::Util
     Swarmage::Worker
+    Swarmage::Worker::Generic
     Swarmage
 );
 plan(tests => scalar @modules);

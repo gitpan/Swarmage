@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Task.pm 36144 2007-12-21T01:05:54.525393Z daisuke  $
+# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Task.pm 36252 2007-12-24T09:06:11.695578Z daisuke  $
 #
 # Copyright (c) 207 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -26,16 +26,31 @@ sub new
     return $self;
 }
 
-sub serialize
+*serialize = \&serialize_base64;
+*deserialize = \&deserialize_base64;
+
+sub serialize_base64
 {
     my $self = shift;
-    MIME::Base64::encode_base64( Storable::nfreeze( $self ) );
+    MIME::Base64::encode_base64( $self->serialize_raw );
 }
 
-sub deserialize
+sub deserialize_base64
 {
     my $self = shift;
-    Storable::thaw( MIME::Base64::decode_base64( $_[0] ) );
+    $self->deserialize_raw( MIME::Base64::decode_base64( $_[0] ) );
+}
+
+sub serialize_raw
+{
+    my $self = shift;
+    Storable::nfreeze( $self );
+}
+
+sub deserialize_raw
+{
+    my $self = shift;
+    Storable::thaw( $_[0] );
 }
 
 1;
@@ -61,5 +76,13 @@ Swarmage::Task - A Task
 =head2 serialize
 
 =head2 deserialize
+
+=head2 serialize_raw
+
+=head2 deserialize_raw
+
+=head2 serialize_base64
+
+=head2 deserialize_base64
 
 =head2

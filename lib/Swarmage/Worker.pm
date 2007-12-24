@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Worker.pm 36146 2007-12-21T01:16:22.381058Z daisuke  $
+# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Worker.pm 36247 2007-12-24T08:33:11.713797Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -11,7 +11,8 @@ use Event::Notify;
 use POE qw(
     Component::Generic
 );
-use Swarmage::Queue::Local::Generic;
+use Swarmage::Queue::Local;
+use UNIVERSAL::require;
 
 __PACKAGE__->mk_accessors($_) for qw( queue task_type backend session_id parent delay log );
 
@@ -20,27 +21,24 @@ sub new
     my $class = shift;
     my %args  = @_;
 
-    my $filename = $args{filename} || die "No filename";
-    my $queue = Swarmage::Queue::Local->new(
-        cleanup      => 1,
-        connect_info => [
-            "dbi:SQLite:dbname=$filename",
-            undef,
-            undef,
-            { RaiseError => 1, AutoCommit => 1 }
-        ]
-    );
+    my $queue    = delete $args{queue} ||
+        Swarmage::Queue::Local->new()
+    ;
 
     my $parent    = delete $args{parent} || die;
     my $task_type = delete $args{task_type};
-    my $delay     = delete $args{delay} || 10;
-    my $backend = POE::Component::Generic->spawn(
-        verbose => 1,
-        package => "Swarmage::Worker::Generic",
-        object_options => [ %args ],
-        methods        => [ qw(work) ]
-    );
-
+    my $delay     = delete $args{delay} || 30;
+    my $backend   = delete $args{backend} ||
+        'Swarmage::Worker::Generic';
+    
+    $backend = ref $backend ? $backend : 
+        do {
+            $backend->require or die;
+            $backend->new(%args);
+        }
+        or die
+    ;
+        
     my $self  = bless {
         queue      => $queue,
         task_type  => $task_type,
@@ -91,7 +89,6 @@ sub _poe_pump_queue
 {
     my ($self, $kernel, $heap) = @_[OBJECT, KERNEL, HEAP];
 
-    $self->log->debug("[WORKER]: PUMP");
     my $queue = $self->queue;
     $kernel->alarm_remove( delete $heap->{pending_pump} );
 
@@ -112,6 +109,8 @@ sub _poe_work_begin
     # If we didn't receive any tasks, re-dispatch a fetch request
     # in X amount of time, which will grow as we encounter more
     # empty queues
+
+    $self->log->debug("[WORKER]: PUMPED " . scalar(@tasks) . " tasks");
 
     if (! @tasks ) {
         if (! $heap->{pending_pump}) {
@@ -182,34 +181,6 @@ sub _poe_work_done
         $self->notify( 'work_done', $current );
         $kernel->yield('pump_queue');
     }
-}
-
-package Swarmage::Worker::Generic;
-use strict;
-use warnings;
-use base qw(Class::Accessor::Fast);
-__PACKAGE__->mk_accessors($_) for qw(slave);
-
-sub new
-{
-    my $class = shift;
-    my %args  = @_;
-
-    my $slave_pkg = Swarmage::Util::load_module($args{module});
-    my $slave     = $slave_pkg->new( %{ $args{config} || {} } );
-    bless {
-        slave => $slave
-    }, $class;
-}
-
-
-sub work
-{
-    my ($self, $task) = @_;
-    warn $self->slave . " -> work";
-    my @ret = eval { $self->slave->work( $task ) };
-    warn if $@;
-    return @ret;
 }
 
 1;

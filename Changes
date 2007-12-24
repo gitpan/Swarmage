@@ -1,6 +1,14 @@
 Changes
 =======
 
+0.01000_02 24 Dec 2007
+  - SQLite with multiple sessions was causing grief, so switched to
+    BerkeleyDB backend.
+  - Local queues are now accessed synchrnously. This is to avoid
+    unnecessary spawning of processes only to be able to asynchronously
+    access the backing storage
+  - Make the workers share the same local queue object.
+
 0.01000_01 21 Dec 2007
   - Complete rewrite. 
     * This is a completely different system with the same name.

@@ -1,4 +1,5 @@
 Changes
+client.pl
 eg/client.pl
 eg/drone.pl
 inc/Module/AutoInstall.pm
@@ -15,13 +16,15 @@ inc/Module/Install/WriteAll.pm
 lib/Swarmage.pm
 lib/Swarmage/Client.pm
 lib/Swarmage/Drone.pm
+lib/Swarmage/Queue.pm
+lib/Swarmage/Queue/BerkeleyDB.pm
 lib/Swarmage/Queue/DBI.pm
-lib/Swarmage/Queue/DBI/Generic.pm
+lib/Swarmage/Queue/Generic.pm
 lib/Swarmage/Queue/Local.pm
-lib/Swarmage/Queue/Local/Generic.pm
 lib/Swarmage/Task.pm
 lib/Swarmage/Util.pm
 lib/Swarmage/Worker.pm
+lib/Swarmage/Worker/Generic.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml
