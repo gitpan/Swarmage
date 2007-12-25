@@ -1,6 +1,12 @@
 Changes
 =======
 
+0.01000_03 25 Dec 2007
+  - Fix merge blunder. Swarmage::Worker should now work.
+  - Add Swarmage::Worker::POE backend. This allows integration with
+    other POE applications without needing to rely on a separate process.
+  - Remove modules from previous life.
+
 0.01000_02 24 Dec 2007
   - SQLite with multiple sessions was causing grief, so switched to
     BerkeleyDB backend.

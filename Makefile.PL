@@ -1,8 +1,8 @@
+#!perl
 use strict;
 use inc::Module::Install;
 
 name('Swarmage');
-
 all_from('lib/Swarmage.pm');
 
 requires('BerkeleyDB');
@@ -23,9 +23,8 @@ requires('Sys::Hostname');
 requires('Time::HiRes');
 requires('UNIVERSAL::require');
 
-build_requires('Test::More');
+build_requires("Test::More");
+recommends('Test::Pod');
+recommends('Test::Pod::Coverage');
 
-tests('t/*.t t/*/*.t');
-
-auto_install;
 WriteAll;

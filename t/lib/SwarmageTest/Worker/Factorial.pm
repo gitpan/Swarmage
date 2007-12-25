@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/branches/2.0-redo/t/lib/SwarmageTest/Worker/Factorial.pm 36144 2007-12-21T01:05:54.525393Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/t/lib/SwarmageTest/Worker/Factorial.pm 36876 2007-12-25T03:11:23.372766Z daisuke  $
 
 package SwarmageTest::Worker::Factorial;
 use strict;

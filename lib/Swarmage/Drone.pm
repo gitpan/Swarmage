@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Drone.pm 36248 2007-12-24T08:59:28.870882Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Drone.pm 36893 2007-12-25T10:47:45.315007Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -37,7 +37,7 @@ sub new
         max_tasks      => {},
         buffered_tasks => {},
         task_types     => {},
-        delay          => 1,
+        delay          => 2,
     }, $class;
     $self->setup_log();
 
@@ -142,15 +142,14 @@ sub register_worker
     $self->max_tasks->{ $worker->task_type } ||= 0;
     $self->max_tasks->{ $worker->task_type } += 15;
 
-
     $worker->register_event('work_done', $self, { method => 'mark_worker_done' });
 }
 
 sub mark_worker_done
 {
     my ($self, $event, $task) = @_;
-    $self->buffered_tasks->{ $task->type }--;
 
+    $self->buffered_tasks->{ $task->type }--;
     $self->queue->dequeue( $task->id );
 
     # If a worker is reported to be done, then there should be an empty
@@ -182,9 +181,8 @@ sub postback
 sub _poe_monitor
 {
     my ($self, $kernel, $heap) = @_[OBJECT, KERNEL, HEAP];
-    if (! $heap->{pump_pending}) {
-        $heap->{pump_pending} = $kernel->delay_set('pump_queue', 1);
-    }
+
+    $self->pump_queue;
     $kernel->delay_set('monitor', $self->delay);
 }
 
@@ -193,6 +191,12 @@ sub _poe_pump_queue
     my ($self, $kernel, $heap) = @_[OBJECT, KERNEL, HEAP];
 
     delete $heap->{pump_pending};
+    $self->pump_queue();
+}
+
+sub pump_queue
+{
+    my $self = shift;
     my $buffered_tasks = $self->buffered_tasks;
     my $max_tasks = $self->max_tasks;
     foreach my $task_type (keys %{ $max_tasks }) {
@@ -242,9 +246,9 @@ sub _poe_spawn_queue
     $self->log->debug("Setting up queue $queue_pkg");
     my $queue = Swarmage::Queue::Generic->new(
         %{ $config->{config} || {} },
-        class => $queue_pkg,
+        class   => $queue_pkg,
         verbose => 1,
-        log   => $self->log,
+        log     => $self->log,
     );
     return $queue;
 }
@@ -329,5 +333,7 @@ type, and dispatches to the appropriate Worker.
 =head2 mark_worker_done
 
 =head2 setup_log
+
+=head2 pump_queue
 
 =cut

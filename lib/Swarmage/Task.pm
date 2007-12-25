@@ -1,6 +1,6 @@
-# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Task.pm 36252 2007-12-24T09:06:11.695578Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Task.pm 36879 2007-12-25T03:46:54.613525Z daisuke  $
 #
-# Copyright (c) 207 Daisuke Maki <daisuke@endeworks.jp>
+# Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
 
 package Swarmage::Task;

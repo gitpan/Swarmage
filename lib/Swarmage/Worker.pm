@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Worker.pm 36247 2007-12-24T08:33:11.713797Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker.pm 36891 2007-12-25T09:22:12.471050Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -8,9 +8,7 @@ use strict;
 use warnings;
 use base qw(Class::Accessor::Fast);
 use Event::Notify;
-use POE qw(
-    Component::Generic
-);
+use POE qw(Component::Generic);
 use Swarmage::Queue::Local;
 use UNIVERSAL::require;
 
@@ -84,6 +82,7 @@ sub _poe_monitor
     }
     $kernel->delay_set('monitor', $self->delay);
 }
+
 
 sub _poe_pump_queue
 {
@@ -193,7 +192,11 @@ Swarmage::Worker - Swarmage Worker
 
 =head1 SYNOPSIS
 
-  use Swarmage::Worker;
+  # Use it by subclassing
+  package MyApp::Worker;
+  use strict;
+  use base qw(Swarmage::Worker);
+  __PACKAGE__->abilities('name_of_ability');
 
 =head1 METHODS
 

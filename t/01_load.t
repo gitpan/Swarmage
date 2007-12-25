@@ -2,7 +2,9 @@ use strict;
 use Test::More;
 
 my @modules = qw(
-    Swarmage::Drone
+    Swarmage
+    Swarmage::Task
+    Swarmage::Client
     Swarmage::Queue::DBI
     Swarmage::Queue::Local
     Swarmage::Queue::BerkeleyDB
@@ -13,5 +15,6 @@ my @modules = qw(
     Swarmage::Worker::Generic
     Swarmage
 );
+
 plan(tests => scalar @modules);
 use_ok($_) for @modules;

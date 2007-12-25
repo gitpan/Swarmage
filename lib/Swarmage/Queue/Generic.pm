@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage/Queue/Generic.pm 36254 2007-12-24T09:08:29.288766Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Queue/Generic.pm 36876 2007-12-25T03:11:23.372766Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.

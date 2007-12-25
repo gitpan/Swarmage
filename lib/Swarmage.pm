@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/branches/2.0-redo/lib/Swarmage.pm 36147 2007-12-21T01:21:44.144725Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage.pm 36883 2007-12-25T04:15:57.892026Z daisuke  $
 #
 # Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -19,7 +19,7 @@ Swarmage - A Distributed Job Queue
 
 =head1 SYNOPSIS
 
-  use Swarmage;
+  use Swarmage
 
 =head1 DESCRIPTION
 
@@ -29,48 +29,51 @@ Swarmage brings you a complete Controlled Job Queue environment for high
 performance, distributed tasks. Swarmage uses POE's asynchronous engine
 to make a non-blocking worker possible.
 
-=head1 TERMS
+Swarmage is a simple distributed job queue system.
 
-=head2 Cell
+Swarmage is comprised of Clients, Workers, and a Message Bus. Clients enqueue
+tasks to be performed in the message queue:
 
-A Swarmage Cell consists of one or more Drones which are attatched to a
-Queue.
+  use strict;
+  use Swarmage::Client;
 
-=head2 Drone
+  my $client = Swarmage::Client->new(
+    hostname => "message.bus.hostname",
+    login    => "foo",
+    passcode => "bar"
+  );
+  $client->insert_task(
+    Swarmage::Task->new(
+      task_class => 'do_something_interesting',
+      args       => $any_set_of_variables
+    )
+  );
 
-A Swarmage Drone is the master process that controls multiple Workers.
-The Workers may consist of completely independent tasks
+That's it for the client. Now you just need a worker to execute your task.
+On some other host (or, it could as well be the same host):
 
-=head2 Worker
+  use strict;
+  use Swarmage::Worker;
 
-A Swarmage Worker is a process that is spawned by the Drone.
+  my $worker = Swarmage::Worker->new(
+    hostname => "message.bus.hostname",
+    login    => "foo",
+    passcode => "bar",
+    ability => {
+      do_something_interesting => sub { "actual code" }
+    }
+  );
+  $worker->work;
 
-=head1 SWARMAGE CELL
+You execute this code, and the worker will keep on waiting for 'do_something_interesting' tasks,
+and will execute them when it gets a chance. 
 
 A Swarmage Cell is the smallest unit of operation in Swarmage, and it looks
 something like this:
 
-  ----------------
-  | Global Queue |
-  ----------------
-     ^ |
-     | v
-  ---------
-  | Drone |--------------------
-  ---------                   |
-      |                       v
-      |  ----------     ---------------
-      |--| Worker |-----| Local Queue |
-      |  ----------  |  ---------------
-      |  ----------  |
-      |--| Worker |--|
-      |  ----------  |
-      |  ----------  |
-      |--| Worker |--|
-      |  ----------  |
-      .              .
-      .              .
-      .              .
+  package MyApp::Worker;
+  use strict;
+  use base qw(Swarmage::Worker);
 
 There is a Global Queue, which Drones attatch to. This is where users typically
 queue their tasks. Drones take tasks that their Workers can handle. This is
@@ -105,3 +108,4 @@ under the same terms as Perl itself.
 See http://www.perl.com/perl/misc/Artistic.html
 
 =cut
+
