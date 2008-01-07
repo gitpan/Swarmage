@@ -1,6 +1,11 @@
 Changes
 =======
 
+0.01000 07 Jan 2008
+  - Fixup a bunch of documents, including removal of docs from previous life.
+  - Stop/Respawn slaves
+  - Refactor 'monitor' state
+
 0.01000_03 25 Dec 2007
   - Fix merge blunder. Swarmage::Worker should now work.
   - Add Swarmage::Worker::POE backend. This allows integration with

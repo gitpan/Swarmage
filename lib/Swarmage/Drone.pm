@@ -1,6 +1,6 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Drone.pm 36893 2007-12-25T10:47:45.315007Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Drone.pm 38165 2008-01-07T05:40:44.186615Z daisuke  $
 #
-# Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
+# Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
 
 package Swarmage::Drone;
@@ -182,8 +182,14 @@ sub _poe_monitor
 {
     my ($self, $kernel, $heap) = @_[OBJECT, KERNEL, HEAP];
 
-    $self->pump_queue;
+    $self->monitor();
     $kernel->delay_set('monitor', $self->delay);
+}
+
+sub monitor
+{
+    my $self = shift;
+    $self->pump_queue;
 }
 
 sub _poe_pump_queue
@@ -263,7 +269,7 @@ Swarmage::Drone - The Drone
 
 =head1 SYNOPSIS
 
-  use Swarmage::Drone;
+  use Swarmage;
   Swarmage::Drone->new(
     queues => [
       {
@@ -335,5 +341,7 @@ type, and dispatches to the appropriate Worker.
 =head2 setup_log
 
 =head2 pump_queue
+
+=head2 monitor
 
 =cut

@@ -1,6 +1,6 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Util.pm 36881 2007-12-25T03:49:44.661233Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Util.pm 38128 2008-01-07T04:52:02.712309Z daisuke  $
 #
-# Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
+# Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved
 
 package Swarmage::Util;

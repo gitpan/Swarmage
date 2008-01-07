@@ -1,6 +1,6 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Queue/DBI.pm 36876 2007-12-25T03:11:23.372766Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Queue/DBI.pm 38128 2008-01-07T04:52:02.712309Z daisuke  $
 #
-# Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
+# Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All right reserved.
 
 package Swarmage::Queue::DBI;

@@ -1,7 +1,7 @@
 --- 
 abstract: A Distributed Job Queue
 author: 
-  - Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
+  - Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 build_requires: 
   Test::More: 0
 distribution_type: module
@@ -36,4 +36,5 @@ requires:
   Sys::Hostname: 0
   Time::HiRes: 0
   UNIVERSAL::require: 0
+tests: t/*.t t/*/*.t t/*/*/*.t
 version: 0.01000

@@ -1,6 +1,6 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker.pm 36891 2007-12-25T09:22:12.471050Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker.pm 38163 2008-01-07T05:17:41.368238Z daisuke  $
 #
-# Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
+# Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
 
 package Swarmage::Worker;
@@ -192,11 +192,14 @@ Swarmage::Worker - Swarmage Worker
 
 =head1 SYNOPSIS
 
-  # Use it by subclassing
-  package MyApp::Worker;
-  use strict;
-  use base qw(Swarmage::Worker);
-  __PACKAGE__->abilities('name_of_ability');
+  # Internal use only
+  my $worker = Swarmage::Worker->new(
+
+=head1 DESCRIPTION
+
+A Worker is a wrapper for your actual worker logic. It uses 
+Swarmage::Worker::Generic or other backend modules as an adaptor to talk to 
+your module.
 
 =head1 METHODS
 

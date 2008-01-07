@@ -1,6 +1,6 @@
 # $Id$
 #
-# Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
+# Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
 
 package Swarmage::Worker::POE;

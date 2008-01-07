@@ -27,4 +27,6 @@ build_requires("Test::More");
 recommends('Test::Pod');
 recommends('Test::Pod::Coverage');
 
+tests ('t/*.t t/*/*.t t/*/*/*.t');
+
 WriteAll;

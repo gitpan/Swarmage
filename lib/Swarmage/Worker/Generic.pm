@@ -1,22 +1,87 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker/Generic.pm 36876 2007-12-25T03:11:23.372766Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker/Generic.pm 38128 2008-01-07T04:52:02.712309Z daisuke  $
 #
-# Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
+# Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
 
 package Swarmage::Worker::Generic;
 use strict;
 use warnings;
+use base qw(Class::Accessor::Fast);
+use POE;
+
+__PACKAGE__->mk_accessors($_) for qw(slave timeout session_id);
 
 sub new
 {
     my $class = shift;
     my %args  = @_;
-    POE::Component::Generic->spawn(
+    my $timeout = $args{timeout};
+
+    my $self = bless {
+        timeout => $timeout,
+        args    => \%args, # fore re-spawn
+    }, $class;
+
+    my $session = POE::Session->create(
+        inline_states => {
+            _start => sub { },
+        },
+        object_states => [
+            $self => {
+                map { ($_ => "_poe_$_") }
+                qw(timeout)
+            }
+        ]
+    );
+    $self->session_id($session->ID);
+    $self->spawn_slave;
+    return $self;
+}
+
+sub spawn_slave
+{
+    my $self = shift;
+    my %args = @_;
+    my $slave = POE::Component::Generic->spawn(
         verbose => 1,
         package => "Swarmage::Worker::Generic::Slave",
         object_options => [ %args ],
         methods        => [ qw(work) ]
     );
+    if (my $old_slave = $self->slave) {
+        $old_slave->shutdown();
+    }
+    $self->slave( $slave );
+}
+
+sub work
+{
+    my $self = shift;
+
+    # Set a timeout alarm, if we've been instructed to use it
+    POE::Kernel->call($self->session_id, "set_timeout");
+}
+
+sub _poe_set_timeout
+{
+    my ($self, $kernel) = @_[OBJECT, KERNEL];
+    if (my $timeout = $self->timeout) {
+        $kernel->alarm_set( 'timeout_reached', $self->timeout )
+    }
+}
+
+sub _poe_timeout_reached
+{
+    my $self = $_[OBJECT];
+
+    $self->stop_slave();
+}
+
+sub stop_slave
+{
+    my $self = shift;
+    $self->slave->{wheel}->kill();
+    $self->spawn_slave();
 }
 
 package Swarmage::Worker::Generic::Slave;
@@ -58,5 +123,11 @@ Swarmage::Worker::Generic - POE::Component::Generic Wrapper For Swarmage::Worker
 =head1 METHODS
 
 =head2 new
+
+=head2 spawn_slave
+
+=head2 stop_slave
+
+=head2 work
 
 =cut

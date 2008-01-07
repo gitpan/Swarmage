@@ -1,6 +1,6 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage.pm 36883 2007-12-25T04:15:57.892026Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage.pm 38164 2008-01-07T05:39:28.711694Z daisuke  $
 #
-# Copyright (c) 2007 Daisuke Maki <daisuke@endeworks.jp>
+# Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
 
 package Swarmage;
@@ -19,7 +19,8 @@ Swarmage - A Distributed Job Queue
 
 =head1 SYNOPSIS
 
-  use Swarmage
+  use Swarmage;
+  Swarmage::Drone->new( ... ); # see docs for Swarmage::Drone
 
 =head1 DESCRIPTION
 
@@ -29,51 +30,30 @@ Swarmage brings you a complete Controlled Job Queue environment for high
 performance, distributed tasks. Swarmage uses POE's asynchronous engine
 to make a non-blocking worker possible.
 
-Swarmage is a simple distributed job queue system.
-
-Swarmage is comprised of Clients, Workers, and a Message Bus. Clients enqueue
-tasks to be performed in the message queue:
-
-  use strict;
-  use Swarmage::Client;
-
-  my $client = Swarmage::Client->new(
-    hostname => "message.bus.hostname",
-    login    => "foo",
-    passcode => "bar"
-  );
-  $client->insert_task(
-    Swarmage::Task->new(
-      task_class => 'do_something_interesting',
-      args       => $any_set_of_variables
-    )
-  );
-
-That's it for the client. Now you just need a worker to execute your task.
-On some other host (or, it could as well be the same host):
-
-  use strict;
-  use Swarmage::Worker;
-
-  my $worker = Swarmage::Worker->new(
-    hostname => "message.bus.hostname",
-    login    => "foo",
-    passcode => "bar",
-    ability => {
-      do_something_interesting => sub { "actual code" }
-    }
-  );
-  $worker->work;
-
-You execute this code, and the worker will keep on waiting for 'do_something_interesting' tasks,
-and will execute them when it gets a chance. 
-
 A Swarmage Cell is the smallest unit of operation in Swarmage, and it looks
 something like this:
 
-  package MyApp::Worker;
-  use strict;
-  use base qw(Swarmage::Worker);
+  ----------------
+  | Global Queue |
+  ----------------
+     ^ |
+     | v
+  ---------
+  | Drone |--------------------
+  ---------                   |
+      |                       v
+      |  ----------     ---------------
+      |--| Worker |-----| Local Queue |
+      |  ----------  |  ---------------
+      |  ----------  |
+      |--| Worker |--|
+      |  ----------  |
+      |  ----------  |
+      |--| Worker |--|
+      |  ----------  |
+      .              .
+      .              .
+      .              .
 
 There is a Global Queue, which Drones attatch to. This is where users typically
 queue their tasks. Drones take tasks that their Workers can handle. This is
@@ -96,9 +76,47 @@ finalized.
 Please consult the documentation for Swarmage::Drone and Swarmage::Worker for
 more details on how the components interact with each other
 
+=head1 SWARMAGE QUEUES
+
+There are several queue types available for Swarmage. Available queues are:
+
+=head2 Swarmage::Queue::DBI
+
+Use a database as your queue. This queue should generally be used in 
+conjunction with Swarmage::Queue::DBI::Generic, which allows you asynchronous
+access to DBI.
+
+=head2 Swarmage::Queue::BerkeleyDB
+
+Uses a BerkeleyDB database as your queue. The Local Queue is currently
+implemented with this.
+
+=head2 Swarmage::Queue::IKC::Client
+
+# WARNINGS: This is still in development
+
+Uses POE::Component::IKC::Client as your queue. The queue asks a remote POE
+kernel for new tasks. Use this if you have a remote POE process that's
+generating the tasks for you.
+
+=head1 SWARMAGE WORKER
+
+Swarmage Workers come in couple of different flavors to allow asynchronous
+execution of tasks.
+
+=head2 Swarmage::Worker::Generic
+
+Swarmage::Worker::Generic uses POE::Component::Generic to spawn off another
+process to do the dirty work.
+
+=head2 Swarmage::Worker::POE
+
+Swarmage::Worker::POE connects to another POE session (for example, Gungho)
+and let id do its job.
+
 =head1 AUTHOR
 
-Copyright (c) 2007 Daisuke Maki E<lt>daisuke@endeworks.jpE<gt>
+Copyright (c) 2007-2008 Daisuke Maki E<lt>daisuke@endeworks.jpE<gt>
 
 =head1 LICENSE
 

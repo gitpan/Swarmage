@@ -16,7 +16,9 @@ lib/Swarmage/Queue.pm
 lib/Swarmage/Queue/BerkeleyDB.pm
 lib/Swarmage/Queue/DBI.pm
 lib/Swarmage/Queue/Generic.pm
+lib/Swarmage/Queue/IKC/Client.pm
 lib/Swarmage/Queue/Local.pm
+lib/Swarmage/Queue/Stomp.pm
 lib/Swarmage/Task.pm
 lib/Swarmage/Util.pm
 lib/Swarmage/Worker.pm
@@ -25,15 +27,22 @@ lib/Swarmage/Worker/POE.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml
-script/swarmage
 t/01_load.t
-t/03_queue/stomp.t
-t/03_task.t
 t/99_kwalitee.t
 t/99_pod-coverage.t
 t/99_pod.t
+t/drone/01_load.t
+t/drone/02_api.t
 t/lib/SwarmageTest/Schema.pm
 t/lib/SwarmageTest/Schema/SwarmageTask.pm
 t/lib/SwarmageTest/Worker/Factorial.pm
 t/lib/SwarmageTest/Worker/Hexadecimal.pm
 t/lib/SwarmageTest/Worker/Sum.pm
+t/queue/berkeleydb/01_load.t
+t/queue/berkeleydb/02_api.t
+t/queue/dbi/01_load.t
+t/queue/dbi/02_api.t
+t/queue/local/01_load.t
+t/queue/local/02_api.t
+t/task/01_load.t
+t/task/02_api.t
