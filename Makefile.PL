@@ -6,6 +6,7 @@ name('Swarmage');
 all_from('lib/Swarmage.pm');
 
 requires('BerkeleyDB');
+requires('Carp');
 requires('Class::Inspector');
 requires('Class::Accessor::Fast');
 requires('Class::Data::Inheritable');
@@ -16,8 +17,10 @@ requires('IO::Handle');
 requires('Log::Dispatch::Handle');
 requires('Log::Dispatch');
 requires('MIME::Base64');
+requires('Path::Class');
 requires('POE');
 requires('POE::Component::Generic');
+requires('POE::Component::IKC');
 requires('Storable');
 requires('Sys::Hostname');
 requires('Time::HiRes');

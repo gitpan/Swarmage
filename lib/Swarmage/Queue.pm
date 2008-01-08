@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Queue.pm 38204 2008-01-08T09:40:38.051560Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Queue.pm 38208 2008-01-08T09:56:27.473285Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.

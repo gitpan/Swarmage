@@ -20,6 +20,7 @@ recommends:
   Test::Pod::Coverage: 0
 requires: 
   BerkeleyDB: 0
+  Carp: 0
   Class::Accessor::Fast: 0
   Class::Data::Inheritable: 0
   Class::Inspector: 0
@@ -32,9 +33,11 @@ requires:
   MIME::Base64: 0
   POE: 0
   POE::Component::Generic: 0
+  POE::Component::IKC: 0
+  Path::Class: 0
   Storable: 0
   Sys::Hostname: 0
   Time::HiRes: 0
   UNIVERSAL::require: 0
 tests: t/*.t t/*/*.t t/*/*/*.t
-version: 0.01001
+version: 0.01002

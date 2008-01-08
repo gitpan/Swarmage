@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage.pm 38164 2008-01-07T05:39:28.711694Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage.pm 38274 2008-01-08T23:46:47.326302Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -7,7 +7,7 @@ package Swarmage;
 use strict;
 use warnings;
 use Swarmage::Drone;
-our $VERSION = '0.01001';
+our $VERSION = '0.01002';
 
 1;
 

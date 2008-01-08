@@ -1,6 +1,9 @@
 Changes
 =======
 
+0.01002 09 Jan 2008
+  - Oops, add Path::Class and POE::Component::IKC as prereq
+
 0.01001 08 Jan 2008
   - Fix Swarmage::Worker::Generic's work()
   - Add is_async() method in the queues, so that we can automatically tell
