@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Queue.pm 38133 2008-01-07T05:06:23.657554Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Queue.pm 38204 2008-01-08T09:40:38.051560Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -8,10 +8,11 @@ use strict;
 use warnings;
 use base qw(Class::Accessor::Fast);
 
-sub new     { die $_[0] . "::new not implemented" }
+sub new     {}
 sub dequeue { die $_[0] . "::dequeue not implemented" }
 sub enqueue { die $_[0] . "::enqueue not implemented" }
 sub pump    { die $_[0] . "::pump not implemented" }
+sub is_async { 0 }
 
 sub poll_wait
 {
@@ -37,6 +38,11 @@ Swarmage::Queue - Base Class For Swarmage Queues
 =head1 METHODS
 
 =head2 new
+
+=head2 is_async
+
+Class method. Should return true if this queue implementation doesn't need to 
+be wrapped up in Swarmage::Queue::Generic.
 
 =head2 dequeue
 

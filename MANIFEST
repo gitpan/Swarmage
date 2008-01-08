@@ -1,6 +1,8 @@
 Changes
 eg/client.pl
 eg/drone.pl
+eg/ikc-client.pl
+eg/ikc-server.pl
 inc/Module/Install.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
@@ -18,7 +20,6 @@ lib/Swarmage/Queue/DBI.pm
 lib/Swarmage/Queue/Generic.pm
 lib/Swarmage/Queue/IKC/Client.pm
 lib/Swarmage/Queue/Local.pm
-lib/Swarmage/Queue/Stomp.pm
 lib/Swarmage/Task.pm
 lib/Swarmage/Util.pm
 lib/Swarmage/Worker.pm
@@ -42,6 +43,7 @@ t/queue/berkeleydb/01_load.t
 t/queue/berkeleydb/02_api.t
 t/queue/dbi/01_load.t
 t/queue/dbi/02_api.t
+t/queue/ikc/01_load.t
 t/queue/local/01_load.t
 t/queue/local/02_api.t
 t/task/01_load.t

@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker/Generic.pm 38128 2008-01-07T04:52:02.712309Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker/Generic.pm 38202 2008-01-08T09:38:29.141562Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -29,7 +29,7 @@ sub new
         object_states => [
             $self => {
                 map { ($_ => "_poe_$_") }
-                qw(timeout)
+                qw(set_timeout timeout_reached)
             }
         ]
     );
@@ -41,11 +41,10 @@ sub new
 sub spawn_slave
 {
     my $self = shift;
-    my %args = @_;
     my $slave = POE::Component::Generic->spawn(
         verbose => 1,
         package => "Swarmage::Worker::Generic::Slave",
-        object_options => [ %args ],
+        object_options => [ %{ $self->{args} } ],
         methods        => [ qw(work) ]
     );
     if (my $old_slave = $self->slave) {
@@ -56,10 +55,13 @@ sub spawn_slave
 
 sub work
 {
-    my $self = shift;
+    my ($self, $ref, $task) = @_;
 
     # Set a timeout alarm, if we've been instructed to use it
     POE::Kernel->call($self->session_id, "set_timeout");
+
+    # Now work
+    $self->slave->work($ref, $task);
 }
 
 sub _poe_set_timeout

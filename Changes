@@ -1,6 +1,15 @@
 Changes
 =======
 
+0.01001 08 Jan 2008
+  - Fix Swarmage::Worker::Generic's work()
+  - Add is_async() method in the queues, so that we can automatically tell
+    if we need to wrap it up in Swarmage::Queue::Generic
+  - Really implement Swarmage::Queue::IKC::Client
+  - Remove Swarmage::Queue::Stomp
+  - Add more sanity tests
+  - Add eg/ikc-server.pl and eg/ikc-client.pl
+
 0.01000 07 Jan 2008
   - Fixup a bunch of documents, including removal of docs from previous life.
   - Stop/Respawn slaves

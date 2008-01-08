@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Util.pm 38128 2008-01-07T04:52:02.712309Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Util.pm 38203 2008-01-08T09:38:45.588768Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved
@@ -6,6 +6,7 @@
 package Swarmage::Util;
 use strict;
 use warnings;
+use Carp qw(croak);
 use Class::Inspector;
 use UNIVERSAL::require;
 
@@ -14,6 +15,7 @@ sub load_module
     my $pkg    = shift;
     my $prefix = shift;
 
+    croak "Received empty package name" if ! $pkg;
     unless ($pkg =~ s/^\+//) {
         $pkg = ($prefix ? "${prefix}::${pkg}" : $pkg);
     }

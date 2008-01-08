@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Drone.pm 38165 2008-01-07T05:40:44.186615Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Drone.pm 38204 2008-01-08T09:40:38.051560Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -249,13 +249,23 @@ sub _poe_spawn_queue
         'Swarmage::Queue'
     );
 
+    # If it's async on its own, then it should be able to handle
+    # things on its own
     $self->log->debug("Setting up queue $queue_pkg");
-    my $queue = Swarmage::Queue::Generic->new(
-        %{ $config->{config} || {} },
-        class   => $queue_pkg,
-        verbose => 1,
-        log     => $self->log,
-    );
+    my $queue;
+    if ( $queue_pkg->is_async() ) {
+        $queue = $queue_pkg->new(
+            %{ $config->{config} },
+            log => $self->log
+        );
+    } else {
+        $queue = Swarmage::Queue::Generic->new(
+            %{ $config->{config} || {} },
+            class   => $queue_pkg,
+            verbose => 1,
+            log     => $self->log,
+        );
+    }
     return $queue;
 }
 
