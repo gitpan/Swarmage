@@ -25,6 +25,7 @@ lib/Swarmage/Util.pm
 lib/Swarmage/Worker.pm
 lib/Swarmage/Worker/Generic.pm
 lib/Swarmage/Worker/POE.pm
+lib/Swarmage/Worker/Process.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml
@@ -36,6 +37,7 @@ t/drone/01_load.t
 t/drone/02_api.t
 t/lib/SwarmageTest/Schema.pm
 t/lib/SwarmageTest/Schema/SwarmageTask.pm
+t/lib/SwarmageTest/Task/Process.pm
 t/lib/SwarmageTest/Worker/Factorial.pm
 t/lib/SwarmageTest/Worker/Hexadecimal.pm
 t/lib/SwarmageTest/Worker/Sum.pm
@@ -48,3 +50,4 @@ t/queue/local/01_load.t
 t/queue/local/02_api.t
 t/task/01_load.t
 t/task/02_api.t
+t/task/03_process.t

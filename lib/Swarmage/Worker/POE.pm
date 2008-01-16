@@ -41,7 +41,8 @@ sub work
         or die "Could not post to slave";
 }
 
-package Swarmage::Worker::POE::Task;
+package # hide from PAUSE
+    Swarmage::Worker::POE::Task;
 use strict;
 use warnings;
 use base qw(Class::Accessor::Fast);

@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker.pm 38163 2008-01-07T05:17:41.368238Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker.pm 39014 2008-01-16T15:54:59.745639Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -29,14 +29,6 @@ sub new
     my $backend   = delete $args{backend} ||
         'Swarmage::Worker::Generic';
     
-    $backend = ref $backend ? $backend : 
-        do {
-            $backend->require or die;
-            $backend->new(%args);
-        }
-        or die
-    ;
-        
     my $self  = bless {
         queue      => $queue,
         task_type  => $task_type,
@@ -46,6 +38,16 @@ sub new
         log        => $parent->log,
         notify_hub => Event::Notify->new,
     }, $class;
+
+    $backend = ref $backend ? $backend : 
+        do {
+            $backend = Swarmage::Util::load_module($backend);
+            $backend->new(%args, worker => $self);
+        }
+        or die
+    ;
+        
+    $self->backend($backend);
 
     my $session = POE::Session->create(
         object_states => [
@@ -130,7 +132,7 @@ sub _poe_work_done
     my ($self, $kernel, $ref) = @_[OBJECT, KERNEL, ARG0];
 
     $self->log->debug("[WORKER]: DONE");
-    my $result = $ref->{result};
+    my $result = $ref->{result} || [];
     my $task = $ref->{task};
 
     my $chained = 0;

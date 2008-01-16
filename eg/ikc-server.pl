@@ -7,8 +7,8 @@ BEGIN
 {
     if ($ENV{IKC_DEBUG}) {
         no warnings 'redefine';
-        *POE::Component::IKC::Responder::DEBUG = sub { 1 }
-        *POE::Component::IKC::Responder::Object::DEBUG = sub { 1 }
+        *POE::Component::IKC::Responder::DEBUG = sub { 1 };
+        *POE::Component::IKC::Responder::Object::DEBUG = sub { 1 };
     }
 }
 

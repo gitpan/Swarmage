@@ -1,6 +1,10 @@
 Changes
 =======
 
+0.01003 17 Jan 2008
+  - put proper semicolon
+  - slight update to the docs
+
 0.01002 09 Jan 2008
   - Oops, add Path::Class and POE::Component::IKC as prereq
 

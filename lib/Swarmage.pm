@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage.pm 38274 2008-01-08T23:46:47.326302Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage.pm 39019 2008-01-16T16:10:07.673500Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -7,7 +7,7 @@ package Swarmage;
 use strict;
 use warnings;
 use Swarmage::Drone;
-our $VERSION = '0.01002';
+our $VERSION = '0.01003';
 
 1;
 
@@ -29,6 +29,8 @@ This is a rewrite of previous Swarmage releases. So we're back to pre-alpha.
 Swarmage brings you a complete Controlled Job Queue environment for high
 performance, distributed tasks. Swarmage uses POE's asynchronous engine
 to make a non-blocking worker possible.
+
+=head1 STRUCTURE
 
 A Swarmage Cell is the smallest unit of operation in Swarmage, and it looks
 something like this:
@@ -60,14 +62,14 @@ queue their tasks. Drones take tasks that their Workers can handle. This is
 done by specifying which Workers can handle which types of tasks in the
 initialization of Drones.
 
-Once the Drone receives possibly multiple tasks from the Global Queue, the
-tasks are inserted into what's called a Local Queue. Drones keep track of
+Once the Drone receives (possibly multiple) tasks from the Global Queue, the
+tasks are inserted into what's called the Local Queue. Drones keep track of
 what tasks are currently handle by looking at this Local Queue, and in
-turn Workers attempt to grab tasks the Local Queue.
+turn Workers attempt to grab tasks from it.
 
-Workers only knows about the Local Queue. This is to avoid unnecessary polling
+Workers only know about the Local Queue. This is to avoid unnecessary polling
 by the Workers to the Global Queue. Workers can also pass tasks between
-other Workers in the local Drone group by enqueuing new tasks to the Local
+Workers in the local Drone group by enqueuing new tasks to the Local
 Queue.
 
 Once the task is completed, the Drone is notified, and the task will be
@@ -92,8 +94,6 @@ Uses a BerkeleyDB database as your queue. The Local Queue is currently
 implemented with this.
 
 =head2 Swarmage::Queue::IKC::Client
-
-# WARNINGS: This is still in development
 
 Uses POE::Component::IKC::Client as your queue. The queue asks a remote POE
 kernel for new tasks. Use this if you have a remote POE process that's
