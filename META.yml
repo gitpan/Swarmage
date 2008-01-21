@@ -40,4 +40,4 @@ requires:
   Time::HiRes: 0
   UNIVERSAL::require: 0
 tests: t/*.t t/*/*.t t/*/*/*.t
-version: 0.01003
+version: 0.01004

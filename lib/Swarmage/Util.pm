@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Util.pm 38203 2008-01-08T09:38:45.588768Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Util.pm 39562 2008-01-21T07:34:51.765326Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved
@@ -20,7 +20,12 @@ sub load_module
         $pkg = ($prefix ? "${prefix}::${pkg}" : $pkg);
     }
 
-    Class::Inspector->loaded($pkg) or $pkg->require or die;
+    if (! Class::Inspector->loaded($pkg) ){
+        eval {
+            $pkg->require or die;
+        };
+        warn if $@;
+    }
     return $pkg;
 }
 

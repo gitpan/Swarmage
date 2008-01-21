@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker/Generic.pm 38202 2008-01-08T09:38:29.141562Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker/Generic.pm 39062 2008-01-16T23:40:20.219380Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -9,7 +9,7 @@ use warnings;
 use base qw(Class::Accessor::Fast);
 use POE;
 
-__PACKAGE__->mk_accessors($_) for qw(slave timeout session_id);
+__PACKAGE__->mk_accessors($_) for qw(worker slave timeout session_id);
 
 sub new
 {
@@ -19,6 +19,7 @@ sub new
 
     my $self = bless {
         timeout => $timeout,
+        worker  => delete $args{worker},
         args    => \%args, # fore re-spawn
     }, $class;
 

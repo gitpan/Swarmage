@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Queue/IKC/Client.pm 38208 2008-01-08T09:56:27.473285Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Queue/IKC/Client.pm 39063 2008-01-16T23:52:40.097783Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -95,7 +95,7 @@ sub _poe_ikc_init
                 qw(register unregister subscribe unsubscribe)
         }
     );
-    $kernel->call('IKC', 'subscribe', sprintf('poe://%s/queue', $self->remote_kernel), [ qw(pump) ]);
+    $kernel->call('IKC', 'subscribe', sprintf('poe://%s/queue', $self->remote_kernel));
     $kernel->call('IKC', 'publish', $self->alias, [ qw(got_task) ]);
     $kernel->delay_set('monitor', 1800);
 }
