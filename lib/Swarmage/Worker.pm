@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker.pm 39014 2008-01-16T15:54:59.745639Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker.pm 39737 2008-01-23T04:05:41.075018Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -44,7 +44,7 @@ sub new
             $backend = Swarmage::Util::load_module($backend);
             $backend->new(%args, worker => $self);
         }
-        or die
+        or die $@
     ;
         
     $self->backend($backend);
@@ -79,19 +79,21 @@ sub _poe_start
 sub _poe_monitor
 {
     my ($self, $kernel, $heap) = @_[OBJECT, KERNEL, HEAP];
+
     if (! $heap->{pump_pending}) {
         $heap->{pump_pending} = $kernel->delay_set('pump_queue', 1);
     }
     $kernel->delay_set('monitor', $self->delay);
 }
 
-
 sub _poe_pump_queue
 {
     my ($self, $kernel, $heap) = @_[OBJECT, KERNEL, HEAP];
 
     my $queue = $self->queue;
-    $kernel->alarm_remove( delete $heap->{pending_pump} );
+    $kernel->alarm_remove( $heap->{pump_pending} );
+
+    delete $heap->{pump_pending};
 
     my @tasks = $queue->pump(
         session    => $self->session_id,
@@ -106,6 +108,8 @@ sub _poe_work_begin
 {
     my ($self, $kernel, $heap, $tasks) = @_[OBJECT, KERNEL, HEAP, ARG0];
 
+    delete $heap->{pump_pending};
+
     my @tasks = @{$tasks};
     # If we didn't receive any tasks, re-dispatch a fetch request
     # in X amount of time, which will grow as we encounter more
@@ -114,9 +118,7 @@ sub _poe_work_begin
     $self->log->debug("[WORKER]: PUMPED " . scalar(@tasks) . " tasks");
 
     if (! @tasks ) {
-        if (! $heap->{pending_pump}) {
-            $heap->{pending_pump} = $kernel->delay_set('pump_queue', $self->delay);
-        }
+        $heap->{pump_pending} = $kernel->delay_set('pump_queue', $self->delay);
     } else {
         $self->backend->work( {
             wantarray => 1,

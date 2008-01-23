@@ -21,6 +21,7 @@ requires('Path::Class');
 requires('POE');
 requires('POE::Component::Generic');
 requires('POE::Component::IKC');
+requires('POE::Component::Q4M', '0.00002');
 requires('Storable');
 requires('Sys::Hostname');
 requires('Time::HiRes');

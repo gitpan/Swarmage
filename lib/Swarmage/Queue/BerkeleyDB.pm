@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Queue/BerkeleyDB.pm 38128 2008-01-07T04:52:02.712309Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Queue/BerkeleyDB.pm 39735 2008-01-23T02:57:57.044329Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -12,7 +12,7 @@ use Carp qw(croak);
 use Path::Class::Dir;
 use Path::Class::File;
 
-__PACKAGE__->mk_accessors($_) for qw(backend filename task_ids);
+__PACKAGE__->mk_accessors($_) for qw(backend filename task_ids unlink);
 
 sub new
 {
@@ -40,9 +40,12 @@ sub new
         -Env      => $env,
     ) or croak "Could not create BerkeleyDB::Hash: $BerkeleyDB::Error";
 
+    my $unlink = exists $args{unlink} ? $args{unlink} : 1;
+
     my $self = bless {
         backend    => $backend,
         filename   => $filename,
+        unlink     => $unlink,
         task_ids   => {},
     }, $class;
 
@@ -101,6 +104,7 @@ sub pump
             push @tasks, $task;
             $count++;
             $self->task_ids->{ $task->id }--;
+            delete $self->task_ids->{$task->id} unless $self->task_ids->{ $task->id };
             if ($cursor->c_del() != 0) {
                 warn "Failed to delete from cursor: $BerkeleyDB::Error";
             }
@@ -111,6 +115,16 @@ sub pump
     undef $cursor;
 
     return @tasks;
+}
+
+sub DESTROY
+{
+    my $self = shift;
+
+    $self->backend->db_close();
+    if ($self->unlink) {
+        $self->filename->parent->rmtree(0, 0);
+    }
 }
 
 1;

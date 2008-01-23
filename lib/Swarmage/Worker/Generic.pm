@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker/Generic.pm 39062 2008-01-16T23:40:20.219380Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Worker/Generic.pm 39721 2008-01-22T08:55:20.406505Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -8,6 +8,9 @@ use strict;
 use warnings;
 use base qw(Class::Accessor::Fast);
 use POE;
+
+use constant GENERIC_DEBUG => 0;
+use constant GENERIC_VERBOSE => 1;
 
 __PACKAGE__->mk_accessors($_) for qw(worker slave timeout session_id);
 
@@ -43,7 +46,8 @@ sub spawn_slave
 {
     my $self = shift;
     my $slave = POE::Component::Generic->spawn(
-        verbose => 1,
+        debug => GENERIC_DEBUG,
+        verbose => GENERIC_VERBOSE,
         package => "Swarmage::Worker::Generic::Slave",
         object_options => [ %{ $self->{args} } ],
         methods        => [ qw(work) ]
@@ -109,7 +113,6 @@ sub new
 sub work
 {
     my ($self, $task) = @_;
-    warn $self->slave . " -> work";
     my @ret = eval { $self->slave->work( $task ) };
     warn if $@;
     return @ret;

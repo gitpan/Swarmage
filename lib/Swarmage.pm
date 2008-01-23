@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage.pm 39564 2008-01-21T10:35:20.081498Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage.pm 39741 2008-01-23T04:13:21.745705Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -7,7 +7,7 @@ package Swarmage;
 use strict;
 use warnings;
 use Swarmage::Drone;
-our $VERSION = '0.01004';
+our $VERSION = '0.01005';
 
 1;
 
@@ -87,6 +87,10 @@ There are several queue types available for Swarmage. Available queues are:
 Use a database as your queue. This queue should generally be used in 
 conjunction with Swarmage::Queue::DBI::Generic, which allows you asynchronous
 access to DBI.
+
+=head2 Swarmage::Queue::Q4M
+
+Uses Q4M mysql-based queue via POE.
 
 =head2 Swarmage::Queue::BerkeleyDB
 

@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Drone.pm 39008 2008-01-16T12:39:30.399311Z daisuke  $
+# $Id: /mirror/perl/Swarmage/trunk/lib/Swarmage/Drone.pm 39735 2008-01-23T02:57:57.044329Z daisuke  $
 #
 # Copyright (c) 2007-2008 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -17,6 +17,8 @@ use Swarmage::Queue::Local;
 use Swarmage::Task;
 use Swarmage::Util;
 use Swarmage::Worker;
+
+use constant DEBUG => 0;
 
 __PACKAGE__->mk_accessors($_) for qw(config alias delay log queue local_queue workers max_tasks buffered_tasks task_types);
 
@@ -75,7 +77,7 @@ sub setup_log
     );
     my $stderr = Log::Dispatch::Handle->new(
         name      => 'stderr',
-        min_level => 'debug',
+        min_level => DEBUG ? 'debug' : 'info',
         handle    => do {
             my $io = IO::Handle->new;
             $io->fdopen(fileno(STDERR), "w");
@@ -95,7 +97,7 @@ sub _poe_start
     }
 
     # Create a local queue
-    my $local_queue = Swarmage::Queue::Local->new();
+    my $local_queue = Swarmage::Queue::Local->new(unlink => 1);
     $self->local_queue( $local_queue );
 
     # Create external queue
@@ -225,6 +227,8 @@ sub _poe_buffer_work
     $self->log->debug("[DRONE] PUMPED " . scalar(@{ $ref->{result} || [] }) . " tasks");
     my %task_types;
     foreach my $task (@{ $ref->{result} || [] }) {
+        warn "?! Weird task received ?!" and next unless $task;
+        
         $self->buffered_tasks->{$task->type}++;
         $self->local_queue->enqueue($task);
         $task_types{ $task->type }++;
